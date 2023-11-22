@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +23,7 @@ import com.example.firebasetest.imageShareApp.recycler.MyAdapter
 // 수정 도전해보기.
 class MainImageShareAppActivity : AppCompatActivity() {
     lateinit var binding : ActivityMainImageShareAppBinding
+    lateinit var myAdapter : MyAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainImageShareAppBinding.inflate(layoutInflater)
@@ -46,10 +48,24 @@ class MainImageShareAppActivity : AppCompatActivity() {
             }
         }
 
-        // 리사이클러뷰 작업하기. 결과 데이터 가져오기.
+
 
 
     }// onCreate
+
+    override fun onStart() {
+        super.onStart()
+        if(MyApplication.checkAuth()){
+            // 리사이클러뷰 작업하기. 결과 데이터 가져오기.
+            makeRecyclerView()
+            binding.recyclerView.visibility = View.VISIBLE
+            binding.logoutTextResult.visibility = View.GONE
+        } else {
+            binding.recyclerView.visibility = View.GONE
+            binding.logoutTextResult.visibility = View.VISIBLE
+
+        }
+    }
     // 메뉴 붙이기. 작업.
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.auth_menu, menu)
@@ -72,6 +88,7 @@ class MainImageShareAppActivity : AppCompatActivity() {
     private fun makeRecyclerView() {
         // 스토어에서, 데이터를 모두 가져오기. 참고로
         // 게시글 id이름, 이미지 이름 동일함. docId 임.
+
         MyApplication.db.collection("AndroidImageShareApp")
             .get()
             .addOnSuccessListener { result ->
@@ -84,12 +101,15 @@ class MainImageShareAppActivity : AppCompatActivity() {
                 }
                 // 리사이클러 뷰에, 1)리니어 매니저, 2)어댑터 등록
                 binding.recyclerView.layoutManager = LinearLayoutManager(this)
-                binding.recyclerView.adapter = MyAdapter(this,itemList)
+                myAdapter = MyAdapter(this,itemList)
+                binding.recyclerView.adapter = myAdapter
+//                binding.recyclerView.adapter = MyAdapter(this,itemList)
             }
             .addOnFailureListener {
                 Toast.makeText(this,"서버 데이터 결과 조회 실패",Toast.LENGTH_SHORT).show()
             }
-    }
+
+    } // makeRecyclerView
 
 
 }
